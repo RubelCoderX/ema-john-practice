@@ -83,3 +83,9 @@ letter-spacing: 0.038px;
 text-decoration: none;
 margin-left: 5px;
 }
+.show-password{
+    margin-left: 40px;
+    margin-top: 10px;
+    font-size: 20px;
+    cursor: pointer;
+}

@@ -7,11 +7,22 @@ import {
   deleteShoppingCart,
   getShoppingCart,
 } from "../../utilities/fakedb";
-import { Link } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 
 const Shop = () => {
   const [products, setProduct] = useState([]);
+  const [currentPages, setCurrentPages] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [cart, setCart] = useState([]);
+  const { totalProducts } = useLoaderData();
+
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
+
+  const pageNumbers = [...Array(totalPages).keys()];
+
+  //   done 1. determine the total number of items
+  //   todo 2. decide on the number of items per page
+  //   done 3.
 
   useEffect(() => {
     fetch("http://localhost:4000/products")
@@ -42,7 +53,7 @@ const Shop = () => {
     // cart.push(product);
     let newCart = [];
     // const newCart =[...cart, product];
-    // if product doesnt exist in the cart, then set quantity =1
+    // if product doesn't exist in the cart, then set quantity =1
     // if exist update quantity by 1
     const exists = cart.find((pd) => pd._id === product._id);
     if (!exists) {
@@ -61,26 +72,53 @@ const Shop = () => {
     setCart([]);
     deleteShoppingCart();
   };
-
+  const options = [5, 10, 20];
+  function handleSelectChange(event) {
+    setItemsPerPage(parseInt(event.target.value));
+    setCurrentPages(0);
+  }
   return (
-    <div className="shop-container">
-      <div className="product-container">
-        {products.map((product) => (
-          <Product
-            key={product._id}
-            product={product}
-            handleAddToCart={handleAddToCart}
-          ></Product>
+    <>
+      <div className="shop-container">
+        <div className="product-container">
+          {products.map((product) => (
+            <Product
+              key={product._id}
+              product={product}
+              handleAddToCart={handleAddToCart}
+            ></Product>
+          ))}
+        </div>
+        <div className="cart-container">
+          <Cart cart={cart} handleClearCart={handleClearCart}>
+            <Link className="proceed-link" to="/orders">
+              <button className="btn-proceed">Review Order</button>
+            </Link>
+          </Cart>
+        </div>
+      </div>
+      {/* pagination */}
+      <div className="pagination">
+        <p>Current Page:{currentPages}</p>
+        {pageNumbers.map((number) => (
+          <button
+            style={{ marginLeft: "10px" }}
+            className={currentPages === number ? "selected" : ""}
+            onClick={() => setCurrentPages(number)}
+            key={number}
+          >
+            {number}
+          </button>
         ))}
+        <select value={itemsPerPage} onChange={handleSelectChange}>
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
       </div>
-      <div className="cart-container">
-        <Cart cart={cart} handleClearCart={handleClearCart}>
-          <Link className="proceed-link" to="/orders">
-            <button className="btn-proceed">Review Order</button>
-          </Link>
-        </Cart>
-      </div>
-    </div>
+    </>
   );
 };
 
